@@ -1,0 +1,119 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage[italian]{babel}
+\usepackage{graphicx}
+\usepackage{framed}
+\lstset{frame=single, breaklines=true}
+
+\title{Corso di Laurea in Ingegneria e Scienze Informatiche\\\textbf{\newline\\Planted}\\{(OOP15 - Process Report)}}
+\date{\today}
+\author{Ashley Caselli (\href{mailto:ashley.caselli@studio.unibo.it}{ashley.caselli@studio.unibo.it})\\Matricola 635153}
+
+\begin{document}
+  \maketitle
+  \newpage
+  \tableofcontents
+  \newpage
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \section{Introduzione}
+  Questo documento descrive lo sviluppo software del progetto Planted, sviluppato per il corso di Programmazione ad Oggetti.
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \section{Requisiti}
+  L’UML è un linguaggio di modellazione basato sul paradigma ad oggetti.\\Al momento esistono diversi strumenti software per la modellazione in UML.\\
+  Il sistema software Planted sarà un semplice editor di testo che permetterà all'utente di scrivere codice conforme al linguaggio usato
+  dalla libreria PlantUML (http://plantuml.com/), e mediante l'integrazione con essa, supporti la visualizzazione real time del modello che si sta creando.\\
+  Inoltre il sistema software dovrà permettere l'esportazione del modello in un formato grafico (es. png).\\
+  Nel caso in cui si stia scrivendo un modello UML dell classi, allora il sistema software dovrà permettere all'utente non solo di esportare il modello
+  in formato grafico (infatti questa funzione deve essere possibile per ogni modello), ma anche di generare codice sorgente a partire dal modello delle classi
+  che si sta definendo. L'utente quindi avrà la possibilità di scegliere il linguaggio nel quale vuole che il codice sorgente sia scritto.\\
+  Il sistema software inoltre dovrà rendere possibile all'utente l'import di file al suo interno e la creazione del modello UML delle classi a partire
+  da codice sorgente (es: scritto in Java).
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \section{Analisi}
+  Il sistema software dovrà essere in grado di gestire progetti, al cui interno ci potranno essere più file di natura diversa (es: file che descrive il modello,
+  file con codice sorgente, ecc...). Un \textbf{progetto (IProject)} è quindi un contenitore di file sorgenti che possono essere scritti in linguaggi diversi tra loro.
+  Ogni progetto al suo interno potrà contenere dei file di natura diversa tra loro. All'interno dell'editor ci sarà la possibilità di creare più progetti,
+  che a loro volta faranno parte dello stesso spazio di lavoro \textbf{(IWorkspace).}\\
+  Un \textbf{file sorgente (ISourceFile)} presente all'interno di un progetto rappresenta perciò un file di testo con una certa estensione a seconda del linguaggio che contiene.\\
+  Queste 3 entità appena descritte sono rappresentate nel modello UML sottostante:
+  \begin{center}
+    \includegraphics[scale=0.5]{img/IWorkspace}
+    \includegraphics[scale=0.5]{img/IProject}
+    \includegraphics[scale=0.5]{img/ISourceFile}
+  \end{center}
+  Ogni file sorgente sarà caratterizzato dal \textbf{tipo (FileType),} che rappresenterà la natura del suo contenuto e la sua estensione.
+  \begin{center}
+    \includegraphics[scale=0.5]{img/filetype}
+  \end{center}
+  Il sistema inoltre richiede la capacità di interpretare il contenuto testuale di un file per poter generare codice sorgente nel linguaggio scelto.
+  Per soddisfare tale requisito sarà necessaria un'entità denominata \textbf{parser (IParser)}, che
+  \begin{center}
+    \includegraphics[scale=0.5]{img/IParser}
+  \end{center}
+
+
+
+
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \section{Design}
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \subsection{Architettura}
+  Per lo sviluppo del progetto si è scelto di utilizzare il pattern architetturale MVC, creando una suddivisione logica dei componenti come segue:
+  \begin{itemize}
+    \item \textbf{Model} si occupa dei dati del sistema, in particolare fornisce funzionalità per la persistenza dei dati all'interno del sistema e fornisce
+    accesso ai dati al controller.
+    \item \textbf{View} si occupa di fornire all'utente la possibilità di interagire con il sistema (a livello grafico), mostrando l'editor
+    di testo, l'albero dei progetti all'interno del workspace e tutte le possibili azioni che l'utente può fare (comandi che saranno passati al controller)
+    con il controller.
+    \item \textbf{Controller} contiene la business logic del sistema. Si occupa dell'interazione tra model e view, in particolare riceve i comandi che l'utente da al sistema
+    attraverso la view e li attua, aggiornando in seguito sia model che view.
+  \end{itemize}
+  \begin{framed}
+    \centering
+    \begin{center}
+      \includegraphics[scale=0.5]{img/mvc}
+    \end{center}
+  \end{framed}
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \subsubsection{Model}
+  Il livello di Model fornisce accesso ai dati del sistema alla business logic, che è rappresentata dal livello denominato Controller.\\
+  I dati presenti all'interno del sistema sono definiti dal seguente modello dei dati:
+  \begin{framed}
+    \centering
+    \textbf{Data Model}
+    \begin{center}
+      \includegraphics[scale=0.5]{img/datamodel}
+    \end{center}
+  \end{framed}
+  Come si può notare dal modello dei dati viene utilizzato il \textbf{bridge pattern} per separare l'entità ISourceEntity dalla sua concreta
+  implementazione (ISourceEntutyImpl). Questo permette di avere una maggiore libertà nel caso in cui si volessero aggiungere funzionalità
+  al sistema in futuro.\\
+  \\L'entità \textbf{IModel} rappresenta il punto di accesso al livello di Model per la business logic. Essa rappresenta quindi il vero e
+  proprio livello di Model del sistema. Le funzionalità che essa fornisce sono descritte di seguito:
+  \begin{center}
+    \includegraphics[scale=0.5]{img/IModel}
+  \end{center}
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \subsubsection{View}
+  Il livello di View è ciò che l'utente vede e con il quale può interagire per inviare comandi al resto del sistema.\\
+  L'entità \textbf{IView} rappresenta questo livello, e fornisce le funzionalità sotto descritte per interagire con esso:
+  \begin{center}
+    \includegraphics[scale=0.5]{img/IView}
+  \end{center}
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \subsubsection{Controller}
+  Il livello Controller è il vero e proprio core del sistema. Esso rappresenta la business logic del sistema, ciò che collega tra loro i due livelli
+  sopra citati: Model e View.
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \subsection{Design Dettagliato}
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \section{Sviluppo}
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \section{Note di Sviluppo}
+  %--------------------------------------------------------------------------------------------------------------------------------------
+  \section{Conclusioni}
+  %--------------------------------------------------------------------------------------------------------------------------------------
+\end{document}
