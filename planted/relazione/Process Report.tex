@@ -6,6 +6,8 @@
 \usepackage[italian]{babel}
 \usepackage{graphicx}
 \usepackage{framed}
+\usepackage[labelfont=bf]{caption}
+% \usepackage[figurename=Figura]{caption}
 \lstset{frame=single, breaklines=true}
 
 \title{Corso di Laurea in Ingegneria e Scienze Informatiche\\\textbf{\newline\\Planted}\\{(OOP15 - Process Report)}}
@@ -33,6 +35,7 @@
   da codice sorgente (es: scritto in Java).
   %--------------------------------------------------------------------------------------------------------------------------------------
   \section{Analisi}
+  //TODO da rivedere
   Il sistema software dovrà essere in grado di gestire progetti, al cui interno ci potranno essere più file di natura diversa (es: file che descrive il modello,
   file con codice sorgente, ecc...). Un \textbf{progetto (IProject)} è quindi un contenitore di file sorgenti che possono essere scritti in linguaggi diversi tra loro.
   Ogni progetto al suo interno potrà contenere dei file di natura diversa tra loro. All'interno dell'editor ci sarà la possibilità di creare più progetti,
@@ -51,7 +54,7 @@
   Il sistema inoltre richiede la capacità di interpretare il contenuto testuale di un file per poter generare codice sorgente nel linguaggio scelto.
   Per soddisfare tale requisito sarà necessaria un'entità denominata \textbf{parser (IParser)}, che
   \begin{center}
-    \includegraphics[scale=0.5]{img/IParser}
+    \includegraphics[scale=0.5]{img/IParserEmpty}
   \end{center}
 
 
@@ -61,7 +64,7 @@
   \section{Design}
   %--------------------------------------------------------------------------------------------------------------------------------------
   \subsection{Architettura}
-  Per lo sviluppo del progetto si è scelto di utilizzare il pattern architetturale MVC, creando una suddivisione logica dei componenti come segue:
+  Per lo sviluppo del progetto si è scelto di utilizzare il \textit{pattern architetturale MVC}, creando una suddivisione logica dei componenti come segue:
   \begin{itemize}
     \item \textbf{Model} si occupa dei dati del sistema, in particolare fornisce funzionalità per la persistenza dei dati all'interno del sistema e fornisce
     accesso ai dati al controller.
@@ -88,7 +91,7 @@
       \includegraphics[scale=0.5]{img/datamodel}
     \end{center}
   \end{framed}
-  Come si può notare dal modello dei dati viene utilizzato il \textbf{bridge pattern} per separare l'entità ISourceEntity dalla sua concreta
+  Come si può notare dal modello dei dati viene utilizzato il \textit{pattern bridge} per separare l'entità ISourceEntity dalla sua concreta
   implementazione (ISourceEntutyImpl). Questo permette di avere una maggiore libertà nel caso in cui si volessero aggiungere funzionalità
   al sistema in futuro.\\
   \\L'entità \textbf{IModel} rappresenta il punto di accesso al livello di Model per la business logic. Essa rappresenta quindi il vero e
@@ -106,14 +109,82 @@
   %--------------------------------------------------------------------------------------------------------------------------------------
   \subsubsection{Controller}
   Il livello Controller è il vero e proprio core del sistema. Esso rappresenta la business logic del sistema, ciò che collega tra loro i due livelli
-  sopra citati: Model e View.
-  %--------------------------------------------------------------------------------------------------------------------------------------
+  sopra citati: Model e View.\\
+  L'entità che rappresenta tale livello è chiamata IController:
+  \begin{center}
+    \includegraphics[scale=0.5]{img/IController}
+  \end{center}
+  Tutta la logica dell'applicazione sarà incapsulata nel componente che implementerà l'interfaccia di IController. In questo modo la logica del sistema
+  rimane indipendente dal modello dei dati (Model) e dalla loro rappresentazione dei dati (View).
+  %---------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \subsubsection{Interazione dei livelli logici}
+  In questa sezione saranno descritte le funzionalità del sistema attraverso alcuni diagrammi di interazione, in particolare il modo con cui i tre livelli descritti
+  in precedenza interagiscono tra loro.\\
+  La modalità di interazione tra i tre livelli è la seguente:
+  \begin{center}
+    \includegraphics[scale=0.8]{img/MVCinteraction}
+  \end{center}
+  La comunicazione tra il livello View ed il livello Controller avviene attraverso il \textit{pattern observer.} In particolare il Controller agisce
+  da osservatore e la View da sorgente di eventi.\\
+  \\Come si può notare dal diagramma sottostante le due entità Controller e View implementano rispettivamente l'interfaccia ICommandObserver ed ICommandObservable
+  che a loro volta implementano le interfacce IObservable ed IObserver.
+  \begin{center}
+    \includegraphics[scale=0.6]{img/pattern-observer}
+  \end{center}
+  Le due interfacce ICommandObserver ed ICommandObservable rappresentano due entità in grado di inviare ed ascoltare comandi, ed interagiscono tra
+  loro tramite il pattern observer. L'interazione tra loro è alla base dell'interazione che c'è tra View e Controller.
+  \begin{center}
+    \includegraphics[scale=0.6]{img/execCommand}
+  \end{center}
+  %--------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \subsubsection{Parser}
+  Il sistema software deve possedere inoltre una funzionalità che gli permette di generare automaticamente il codice sorgente Java a partire dal modello UML delle
+  classi e viceversa. Per soddisfare questa funzionalità c'è la necessità di avere all'interno del sistema un'entità in grado di prendere in input uno stream di dati
+  e fornire in output un diverso stream di dati ma strettamente correlato a quello fornitogli in ingresso. Questà entità deve quindi essere in grado fare
+  un'analisi lessicale e sintattica dello stream passatogli in input, e fornire in output uno stream conforme lessicalmente e sintatticamente a ciò che viene
+  richiesto (sia esso codice Java o codice per la libreria PlantUML).\\
+  Il comportamento descritto sopra viene detto \textit{parsing,} ovvero l'insieme dell'analisi lessicale ed analisi sintattica di uno stream di dati.\\
+  \\L'entità che ha il compito di effettuare il parsing è chiamata \textbf{IParser.}
+  \begin{center}
+    \includegraphics[scale=0.6]{img/IParser}
+  \end{center}
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \subsection{Design Dettagliato}
-  %--------------------------------------------------------------------------------------------------------------------------------------
+  Il sistema è suddiviso in package, ognuno dei quali conterrà una parte di sistema.\\
+  Ogni package avrà al suo interno tutto ciò che si occupa della parte del sistema per cui è stato pensato.
+  \\Il primo package descritto è chiamato \textbf{interfaces}. Al suo interno si trovano le interfacce delle entità che compongono il modello del dominio. Queste
+  interfacce sono scritte nel linguaggio che si sceglierà per lo sviluppo del sistema software e dipendono esclusivamente dal meta modello creato per il sistema (per esempio
+  attraverso i diagrammi UML). Al suo interno non ci deve essere nessuna implementazione e logica del sistema.\\
+  La logica del sistema è contenuta nel package definito \textbf{controller,} che conterrà esclusivamente la business logic.\\
+  Il del package \textbf{model} è stato pensato per contenere le implementazioni delle entità del modello del dominio che riguardano il livello logico di Model
+  dell'architettura MVC. È bene suddividere i compiti del sistema, ed anche i package in modo che salti subito all'occhio di quale livello un'entità fa parte.\\
+  Per contenere il livello di View è stato creato il package \textbf{gui.}
+  \begin{framed}
+    \centering
+    \begin{center}
+      \textbf{MVC - Packages}\par\medskip
+      \includegraphics[scale=0.6]{img/MVCPackage}
+    \end{center}
+  \end{framed}
+  Inoltre sono stati definiti ulteriori package per avere una maggiore suddivisione logica della componenti del sistema. Per questo motivo sono stati creati i package
+  \textbf{parser}, \textbf{parser.listener} e \textbf{parser.printer} che, come si può intuire dal nome, conterranno tutto ciò che riguarda la funzionalità di parsing.
+  Infine sono stati definiti altri package utili alla realizazzione finale del sistema: il package \textbf{utils} che conterrà al suo interno le utilità del sistema
+  e le impostazioni; il package \textbf{exception}, al cui interno si troveranno le del sistema; ed il package \textbf{filefilter} che sarà utile per la gestione dei file
+  di progetto.
+  \begin{framed}
+    \centering
+    \begin{center}
+      % \textbf{MVC - Packages}\par\medskip
+      \includegraphics[scale=0.6]{img/generalPackages}
+    \end{center}
+  \end{framed}
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \section{Sviluppo}
-  %--------------------------------------------------------------------------------------------------------------------------------------
-  \section{Note di Sviluppo}
-  %--------------------------------------------------------------------------------------------------------------------------------------
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \subsection{Parsing}
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \subsection{Note di Sviluppo}
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \section{Conclusioni}
-  %--------------------------------------------------------------------------------------------------------------------------------------
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
 \end{document}
