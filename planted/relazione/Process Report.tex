@@ -138,7 +138,7 @@
   \end{center}
   %--------------------------------------------------------------------------------------------------------------------------------------------------------------
   \subsubsection{Parser}
-  Il sistema software deve possedere inoltre una funzionalità che gli permette di generare automaticamente il codice sorgente Java a partire dal modello UML delle
+  Il sistema software deve possedere inoltre una funzionalità che permette di generare automaticamente il codice sorgente Java a partire dal modello UML delle
   classi e viceversa. Per soddisfare questa funzionalità c'è la necessità di avere all'interno del sistema un'entità in grado di prendere in input uno stream di dati
   e fornire in output un diverso stream di dati ma strettamente correlato a quello fornitogli in ingresso. Questà entità deve quindi essere in grado fare
   un'analisi lessicale e sintattica dello stream passatogli in input, e fornire in output uno stream conforme lessicalmente e sintatticamente a ciò che viene
@@ -180,8 +180,115 @@
   \end{framed}
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \section{Sviluppo}
+  La fase di sviluppo del sistema software richiede innanzitutto di scegliere il linguaggio di programmazione con il quale verrà scritto il codice. In questo caso, essendo questo progetto
+  sviluppato per l'esame di OOP, sarà usato (Java - versione 8).\\
+  Questa fase deve iniziare tassativamente solo dopo che si sono ultimate le fasi di analisi (dei requisiti e del problema) e si è definito il design del sistema, definendo quindi
+  il modello del dominio.\\
+  \\L'utilizzo di Java mi ha portato a basare lo sviluppo del progetto su Maven, un gestore di progetti Java e build automation. In questo modo l'implementazione del progetto non dipenderà da nessun IDE (in questo caso
+  è viene usato Eclipse), ma solo ed esclusivamente dai file di configurazione di Maven.\\
+  Quando si è in questa fase si inizia sempre col creare le implementazioni delle entità che definiscono il modello del dominio ed i loro relativi Unit Test. Seguendo questa politica, ho successivamente
+  implementato tutte le componenti essenziali per l'architettura MVC in modo da avere un core dell'applicazione pronto per essere ampliato con le relative funzionalità.\\
+  Implementare le componenti essenziali per l'architettura MVC consiste nello scrivere una prima, anche se scarna, business logic del sistema, che sarà in seguito ampliata per soddisfare tutte le funzionalità
+  che il sistema deve avere. Per fare ciò bisogna definire un comportamento per ogni metodo che si era definito nel modello del Controller.\\
+  \\Molto importante nello sviluppo è la creazione di classi di supporto e per le configurazioni del sistema. In questo modo risulta più semplice
+  la manutenzione e c'è una maggior divisione logica dei compiti. In particolare ho creato una classe, chiamata \textbf{SysKB}, che ha come unico scopo il raccoglimento
+  di tutti quei parametri usati nel sistema come predefiniti ma che possono essere oggetto di future modifiche non preventivate in questo progetto (es. path
+  delle cartelle dove si serializzano i dati). Oltre alla buona organizzazione ed alla facile manutenzione, questo permette anche di estendere alcune funzionalità
+  del sistema e modificarle senza dover modificare tutto il core di esso.
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \subsection{Parsing}
+  La funzionalità di Parsing richiesta per lo soddisfacimento del requisito del sistema può essere sviluppata in più modi.\\Il primo modo, nonchè il più
+  semplice da costruire senza avere nessuna conoscenza avanzata sulla costruzione di un parser, è quello di costruire alcune classi che fungono da riconoscitori di
+  grammatica e "convertitori" di ciò che stanno leggendo verso un nuovo stream di dati il cui contenuto dovrà essere conforme al linguaggio richiesto. In questo
+  modo ho costruito due classi in grado di prendere in ingresso uno stream di dati (ed il tipo del file, che indica il modo in cui va interpretato lo stream),
+  analizzarne il contenuto e creare uno stream di dati in uscita che conterrà lo stream di dati preso in ingresso e convertito verso un linguaggio scelto.
+  \begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{img/firstParser}
+  \end{figure}
+  In questo modo se si vogliono aggiungere uno o più linguaggi a quelli che il sistema è già in grado di parserizzare, l'unica cosa da fare è creare una classe
+  che estende l'interfaccia \textbf{IParser} ed al suo interno costruire un riconoscitore per la grammatica usata dal linguaggio che si vuole aggiungere.\\
+  \\La costruzione di un riconoscitore di  grammatica in questo modo però ha molti limiti, che si evidenziano all'aumentare dei possibili token che la grammatica
+  utilizza. Per questo motivo (e non solo) ho deciso di sviluppare la funzionalità di Parsing attraverso l'utilizzo di un generatore di parser, e dopo essermi
+  documentato su come si costruisce un "vero" parser ho optato per l'utilizzo di ANTLR v4.
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \subsubsection{ANTLR v4 - Grammatiche}
+  ANTLR è un generatore di parser per leggere, processare e/o tradurre testo strutturato. Il suo funzionamento si basa sulla definizione di una grammatica, ed a partire
+  da essa il tool genera le classi necessarie (lexer, parser, listener) per eseguire le varie operazioni.\\
+  \\Utilizzando questo tool (esiste l'integrazione per quasi ogni IDE) ho scritto due grammatiche:
+  \begin{itemize}
+    \item \textbf{Plant} grammatica di base per il linguaggio usato dalla libreria PlantUML
+      \begin{lstlisting}
+        grammar Plant;
+
+        // Parser Rules
+
+        plantDeclaration : '@startuml' classDeclaration* '@enduml';
+        classDeclaration : 'class' TEXT classBody;
+        classBody : '{' classBodyDeclaration* '}';
+        classBodyDeclaration: fieldDeclaration | methodDeclaration ;
+        fieldDeclaration : modifierDeclaration? nameDeclaration ':' typeDeclaration;
+        methodDeclaration: modifierDeclaration? returnTypeMethodDeclaration? methodNameDeclaration paramDeclaration  ;
+        returnTypeMethodDeclaration: 'int' | 'String' | 'void';
+        paramDeclaration: '(' paramBodyDeclaration* ')';
+        firstParamBodyDeclaration: typeParamDeclaration TEXT;
+        paramBodyDeclaration: firstParamBodyDeclaration otherParamBodyDeclaration*;
+        otherParamBodyDeclaration: ',' typeParamDeclaration TEXT;
+        typeParamDeclaration: 'int' | 'String';
+        typeDeclaration: 'int' | 'String';
+        modifierDeclaration :  MODIFIER;
+        nameDeclaration : TEXT;
+        methodNameDeclaration : TEXT;
+
+        // Lexer Rules
+
+        TEXT : ('a'..'z' | 'A'..'Z')+ ;
+        MODIFIER : '+' | '-' | '~' | '#';
+        WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+ -> skip ;
+      \end{lstlisting}
+    \item \textbf{SimpleJava} grammatica di base per Java
+      \begin{lstlisting}
+        grammar SimpleJava;
+
+        // Parser Rules
+
+        classDeclaration : modifier 'class' TEXT classBody;
+        classBody: '{' classBodyDeclaration* '}';
+        classBodyDeclaration: fieldDeclaration | methodDeclaration;
+        methodDeclaration: modifier? methodReturnType methodName paramDeclaration methodBodyDeclaration;
+        methodName: TEXT;
+        methodBodyDeclaration: '{' methodBody '}';
+        methodBody: ((TEXT | '.' | '=')* ';')*;
+        paramDeclaration:'(' paramBodyDeclaration* ')';
+        paramBodyDeclaration: firstParamBodyDeclaration otherParamBodyDeclaration*;
+        firstParamBodyDeclaration: paramType paramName;
+        otherParamBodyDeclaration: ',' paramType paramName;
+        paramName : TEXT;
+        fieldDeclaration: modifier? fieldType fieldName fieldInitializion? ';';
+        fieldInitializion: '=' TEXT;
+        fieldName: TEXT;
+        modifier
+          :	'public'
+          |	'protected'
+          |	'private'
+          ;
+        methodReturnType: 'void' | type;
+        type: 'int' | 'String' | 'boolean';
+        fieldType: type;
+        paramType: type;
+
+        // Lexer Rules
+
+        TEXT : ('a'..'z' | 'A'..'Z')+ ;
+        WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+ -> skip ;
+      \end{lstlisting}
+  \end{itemize}
+  A partire da queste grammatiche ho utilizzato il tool per generare il necessario per utilizzare il parser attraverso i listener.
+
+
+
+
+
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \subsection{Note di Sviluppo}
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
