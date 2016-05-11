@@ -1,13 +1,15 @@
 \documentclass{article}
+\usepackage[titletoc, title]{appendix}
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
 \usepackage{listings}
 \usepackage{enumitem}
 \usepackage[italian]{babel}
 \usepackage{graphicx}
+\usepackage{float}
 \usepackage{framed}
 \usepackage[labelfont=bf]{caption}
-% \usepackage[figurename=Figura]{caption}
+\usepackage[figurename=Appendice A - Figura]{caption}
 \lstset{frame=single, breaklines=true}
 
 \title{Corso di Laurea in Ingegneria e Scienze Informatiche\\\textbf{\newline\\Planted}\\{(OOP15 - Process Report)}}
@@ -184,8 +186,8 @@
   sviluppato per l'esame di OOP, sarà usato (Java - versione 8).\\
   Questa fase deve iniziare tassativamente solo dopo che si sono ultimate le fasi di analisi (dei requisiti e del problema) e si è definito il design del sistema, definendo quindi
   il modello del dominio.\\
-  \\L'utilizzo di Java mi ha portato a basare lo sviluppo del progetto su Maven, un gestore di progetti Java e build automation. In questo modo l'implementazione del progetto non dipenderà da nessun IDE (in questo caso
-  è viene usato Eclipse), ma solo ed esclusivamente dai file di configurazione di Maven.\\
+  \\L'utilizzo di Java mi ha portato a basare lo sviluppo su un gestore di progetti Java e build automation. In questo modo l'implementazione del progetto non dipenderà da nessun IDE,
+  ma solo ed esclusivamente dai file di configurazione di esso.\\
   Quando si è in questa fase si inizia sempre col creare le implementazioni delle entità che definiscono il modello del dominio ed i loro relativi Unit Test. Seguendo questa politica, ho successivamente
   implementato tutte le componenti essenziali per l'architettura MVC in modo da avere un core dell'applicazione pronto per essere ampliato con le relative funzionalità.\\
   Implementare le componenti essenziali per l'architettura MVC consiste nello scrivere una prima, anche se scarna, business logic del sistema, che sarà in seguito ampliata per soddisfare tutte le funzionalità
@@ -202,20 +204,20 @@
   grammatica e "convertitori" di ciò che stanno leggendo verso un nuovo stream di dati il cui contenuto dovrà essere conforme al linguaggio richiesto. In questo
   modo ho costruito due classi in grado di prendere in ingresso uno stream di dati (ed il tipo del file, che indica il modo in cui va interpretato lo stream),
   analizzarne il contenuto e creare uno stream di dati in uscita che conterrà lo stream di dati preso in ingresso e convertito verso un linguaggio scelto.
-  \begin{figure}[h]
+  \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{img/firstParser}
   \end{figure}
-  In questo modo se si vogliono aggiungere uno o più linguaggi a quelli che il sistema è già in grado di parserizzare, l'unica cosa da fare è creare una classe
+  In questo modo se si vogliono aggiungere uno o più linguaggi a quelli che il sistema è già in grado di parserizzare, l'unica cosa da fare è creare un'entità
   che estende l'interfaccia \textbf{IParser} ed al suo interno costruire un riconoscitore per la grammatica usata dal linguaggio che si vuole aggiungere.\\
   \\La costruzione di un riconoscitore di  grammatica in questo modo però ha molti limiti, che si evidenziano all'aumentare dei possibili token che la grammatica
   utilizza. Per questo motivo (e non solo) ho deciso di sviluppare la funzionalità di Parsing attraverso l'utilizzo di un generatore di parser, e dopo essermi
   documentato su come si costruisce un "vero" parser ho optato per l'utilizzo di ANTLR v4.
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
-  \subsubsection{ANTLR v4 - Grammatiche}
+  \subsubsection{ANTLR - Definizione delle Grammatiche}
   ANTLR è un generatore di parser per leggere, processare e/o tradurre testo strutturato. Il suo funzionamento si basa sulla definizione di una grammatica, ed a partire
   da essa il tool genera le classi necessarie (lexer, parser, listener) per eseguire le varie operazioni.\\
-  \\Utilizzando questo tool (esiste l'integrazione per quasi ogni IDE) ho scritto due grammatiche:
+  \\Utilizzando questo tool ho scritto due grammatiche:
   \begin{itemize}
     \item \textbf{Plant} grammatica di base per il linguaggio usato dalla libreria PlantUML
       \begin{lstlisting}
@@ -283,15 +285,135 @@
         WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+ -> skip ;
       \end{lstlisting}
   \end{itemize}
-  A partire da queste grammatiche ho utilizzato il tool per generare il necessario per utilizzare il parser attraverso i listener.
-
-
-
-
-
+  Le grammatiche di cui sopra, non comprendono tutto il linguaggio Java e tutto il linguaggio usato dalla libreria PlantUML, quindi non ho riscritto un parser per
+  questi due linguaggi, ma ho solamente scritto due grammatiche che comprendono i concetti base dei due linguaggi.\\
+  \\A partire da queste grammatiche ho utilizzato il tool per generare il necessario per effettuare il parsing.\\
+  Come nella soluzione prima soluzione adottata per la costruzione del parser, ho costruito un entità in grado di convertire lo stream di dati preso in ingresso
+  in uno stream di dati di natura diversa. L'utilizzo di ANTLR, non solo è ottimo per quanto riguarda la costruzione del parser, ma anche per quanto riguarda
+  la costruzione di quest'ultima entità che viene creata in maniera molto semplice utilizzando i listener creati da ANTLR.\\
+  I \textbf{listener} di ANTLR seguono il funzionamento definito dal pattern observer, e permettono di definire un comportamento specifico ogni qualvolta si
+  entra ed esce da una regola definita nella grammatica. In questo caso, implementando i listener delle relative grammatiche, è stato costruito uno stream di
+  dati che, non appena conclusasi l'analisi dello stream in input, conterrà l'output finale desiderato. Il listener relativo per una grammatica viene creato runtime
+  da un'entità che implementa l'interfaccia \textit{IParser}, che seleziona quale listener creare in base al tipo dello stream di dati che gli viene passato
+  come input.
+  \begin{center}
+    \begin{framed}
+      \textbf{PlantPrinter}\par\medskip
+      \includegraphics[scale=0.6]{img/PlantPrinter}
+    \end{framed}
+  \end{center}
+  \begin{center}
+    \begin{framed}
+      \textbf{JavaPrinter}\par\medskip
+      \includegraphics[scale=0.6]{img/JavaPrinter}
+    \end{framed}
+  \end{center}
+  \begin{center}
+    \begin{framed}
+      Esempio di Listener - \textbf{PlantToJListener}\par\medskip
+      \includegraphics[scale=0.6]{img/PlantToJ}
+    \end{framed}
+  \end{center}
+  La creazione dello stream dati in output avviene mediante l'utilizzo del pattern observer tra Printer e Listener. Le due entità fungono rispettivamente da
+  \textit{observer} ed \textit{observable}. Lo stream di dati in output viene creato all'interno del Listener che, non appena ne ha completato la creazione,
+  notifica l'ascoltatore (Printer).\\
+  Un esempio del funzionamento di tale sistema è spiegato nel seguente diagramma di interazione:
+  \begin{figure}[H]
+    \begin{framed}
+      \centering
+      \includegraphics[scale=0.6]{img/ListenerPrinter}
+    \end{framed}
+  \end{figure}
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \subsection{Note di Sviluppo}
+  La fase di sviluppo del sistema software è avvenuta attraverso l'utilizzo di vari tool e librerie.\\
+  \\Il codice è stato scritto in Java 8, e salvato mediante l'utilizzo di \textit{git} su GitLab (\url{https://gitlab.com/}). Successivamente, come richiesto dal prof. Mirko Viroli,
+  il codice è stato importato su BitBucket (\url{https://bitbucket.org/ashleycaselli/oop15-planted}) all'interno di un progetto appositamente creato
+  utilizzando \textit{mercurial} per il controllo di versione.
+  Come descritto in precedenza ho usato un gestore di progetti, chiamato Maven (\url{http://maven.apache.org/}), integrato all'interno dell'IDE di sviluppo Eclipse
+  (\url{https://eclipse.org/}). Per la fase di testing ho utilizzato il tool JUnit 4 (\url{http://junit.org/junit4/}).\\
+  Ho utilizzato il generatore di parser ANTLR v4 (\url{http://www.antlr.org/}), come descritto in precedenza, per implementare la funzionalità di parsing.
+  Ed infine ho utilizzato la libreria PlantUML (\url{http://plantuml.com/}) per effettuare l'esportazione dei grafici / diagrammi in formato grafico.\\
+  NB: utilizzando Maven come gestore del progetto, esso non potrà essere importato direttamente in Eclipse come "progetto Eclipse".
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \newpage
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   \section{Conclusioni}
+  Non sono pienamente soddisfatto del risultato finale ottenuto anche se le funzionalità base del sistema sono state implementate tutte. Ciò che non mi rende
+  completamente soddisfatto del lavoro svolto è la progettazione del sistema. In particolare avrei voluto che la definizione del modello del dominio fosse
+  ancora più estendibile ed in grado di essere estesa in un futuro senza grosse modifiche del progetto attuale.\\
+  \\Sono invece molto soddisfatto di aver potuto ampliare le mie conoscenze di alcuni tool mai studiati nel corso della mia carriera universitaria, ma che ora
+  ritengo di fondamentale importanza per quanto riguarda lo sviluppo di un sistema software.\\
+  Inoltre, e non ultimo per importanza, ho avuto la possibilità di guardare avanti nella mia carriera universitaria ed anticipare alcuni argomenti che verranno
+  studiati nel corso di laurea magistrale (utilizzo di ANTLR e costruzione di grammatiche/linguaggi).
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \clearpage
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  \begin{appendices}
+    \section{Guida Utente}
+    La prima volta che si esegue l'applicazione Planted sarà visualizzata questa schermata, con il pannello dei progetti vuoto.
+    \begin{figure}[H]
+      \includegraphics[scale=0.5]{img/application/initial-form}
+    \end{figure}
+    Il primo passo da fare è creare un progetto attraverso la voce \textit{Nuovo Progetto} del Menù.
+    Alla creazione del progetto verrà richiesto il nome, ed una volta inserito, il progetto, sarà visualizzato nel pannello dei progetti a sinistra.
+    \begin{figure}[H]
+      \centering
+      \begin{framed}
+        \includegraphics[scale=0.5]{img/application/project-input-form}
+        \includegraphics[scale=0.5]{img/application/project-viewer}
+      \end{framed}
+      \caption{Creazione di un nuovo progetto}
+    \end{figure}
+    A questo punto, abbiamo creato il nostro primo progetto. L'alto della finestra ci indica il progetto corrente, su cui stiamo lavorando. Ogni volta che si crea
+    un nuovo progetto, esso diventerà il progetto  corrente. Nel caso in cui si avessero più di due progetti, si può selezionare il progetto che si vuole fare
+    diventare il corrente semplicemente con un click su di esso dal pannello dei progetti posto a sinistra.
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale=0.5]{img/application/proj-selected}
+      \caption{Progetto corrente}
+    \end{figure}
+    \newpage
+    Ora non ci resta che inserire il primo file sorgente all'interno del progetto precedentemente creato. L'inserimento può avvenire in due modi:
+    \begin{itemize}
+      \item \textbf{Creando un nuovo file attraverso l'apposita voce \textit{Nuovo File} del Menù.} Utilizzando questa modalità, dopo aver inserito il nome, deve essere scelto
+      il tipo del file sorgente. Una volta creato il file, il sistema automaticamente lo inserirà, con la sua relativa estensione che dipende dalla scelta del tipo,
+      all'interno del pannello progetti, nella sezione relativa ai file del progetto.
+      \begin{figure}[H]
+        \centering
+        \begin{framed}
+          \includegraphics[scale=0.5]{img/application/file-input-form}
+          \includegraphics[scale=0.5]{img/application/file-input-chooser}
+          \includegraphics[scale=0.5]{img/application/project-viewer-files}
+        \end{framed}
+        \caption{Creazione di un nuovo file sorgente}
+      \end{figure}
+      \item \textbf{Importando un file esistente presente all'interno del nostro computer, utilizzando la voce \textit{Importa} del Menù.} Utilizzando questa modalità
+      si può scegliere il file esistente da importare all'interno del progetto attraverso il File Chooser. Esso da la possibilità di filtrare i file a seconda
+      della loro natura.
+      \begin{figure}[H]
+        \centering
+        \begin{framed}
+          \includegraphics[scale=0.4]{img/application/file-chooser-java}
+          \includegraphics[scale=0.4]{img/application/file-chooser-plant}
+        \end{framed}
+        \caption{Import di un file sorgente esistente}
+      \end{figure}
+    \end{itemize}
+    Planted permette all'utente di scrivere codice attraverso l'editor messo a disposizione, predisponendo un ambiente diverso per ogni tipo di file sorgente
+    che viene aperto in esso e funzionalità diverse.
+    Vediamo come sia possibile per esempio, quando si apre un file con estensione ".pu", effettuare sia la generazione di codice che l'esportazione grafica.
+    Tali funzionalità non sono tutte presenti all'apertura di un file con estensione ".java", col quale è possibile solo utilizzare la funzionalità per generare
+    il codice.\\La funzionalità per generare il codice permette all'utente di scegliere il linguaggio con il quale il codice deve essere scritto, a prescindere
+    dalla natura del file aperto nell'editor. In questo modo è possibile convertire file ".java" in file ".pu" e viceversa.\\
+    \\Inoltre l'editor presenta un pannello (posto in basso) di visualizzazione real-time del modello grafico, che è utilizzato esclusivamente quando si
+    sta scrivendo o si effettuano modifiche su un file ".pu". Tale pannello contiene l'anteprima grafica di ciò che verrà salvato con il comando di "Export Diagram"
+    in un file con formato grafico (es. ".png").\\
+    \\Le altre funzionalità di base come salva o elimina, non descritte in questa guida, permettono di effettuare il salvataggio del file che si sta editando
+    e la rimozione dell'elemento selezionato. Se l'elemento selezionato è un progetto, la rimozione comporta anche la rimozione di tutti i file presenti
+    all'interno di esso.
+  \end{appendices}
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
 \end{document}
