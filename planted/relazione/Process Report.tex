@@ -26,42 +26,38 @@
   Questo documento descrive lo sviluppo software del progetto Planted, sviluppato per il corso di Programmazione ad Oggetti.
   %--------------------------------------------------------------------------------------------------------------------------------------
   \section{Requisiti}
-  L’UML è un linguaggio di modellazione basato sul paradigma ad oggetti.\\Al momento esistono diversi strumenti software per la modellazione in UML.\\
-  Il sistema software Planted sarà un semplice editor di testo che permetterà all'utente di scrivere codice conforme al linguaggio usato
-  dalla libreria PlantUML (http://plantuml.com/), e mediante l'integrazione con essa, supporti la visualizzazione real time del modello che si sta creando.\\
-  Inoltre il sistema software dovrà permettere l'esportazione del modello in un formato grafico (es. png).\\
-  Nel caso in cui si stia scrivendo un modello UML dell classi, allora il sistema software dovrà permettere all'utente non solo di esportare il modello
-  in formato grafico (infatti questa funzione deve essere possibile per ogni modello), ma anche di generare codice sorgente a partire dal modello delle classi
-  che si sta definendo. L'utente quindi avrà la possibilità di scegliere il linguaggio nel quale vuole che il codice sorgente sia scritto.\\
-  Il sistema software inoltre dovrà rendere possibile all'utente l'import di file al suo interno e la creazione del modello UML delle classi a partire
-  da codice sorgente (es: scritto in Java).
+  Il software mira alla costruzione di un editor di testo, che attraverso l'integrazione con la libreria PlantUML, renda possibile ai suoi utilizzatori
+  la definizione di modelli e diagrammi UML.
+  L’UML è un linguaggio di modellazione basato sul paradigma ad oggetti. Al momento esistono diversi strumenti software per la modellazione in UML.\\[0.3in]
+  {\large \textbf{Requisiti concordati}}
+  \begin{itemize}
+    \item Il suddetto software dovrà essere un semplice editor di testo che permetterà all'utente di scrivere codice conforme al linguaggio usato
+      dalla libreria PlantUML (\url{http://plantuml.com/}), e mediante l'integrazione con essa, supportare la visualizzazione real time del modello che si sta creando.
+    \item Il modello dovrà poter essere esportato in un formato grafico (es: png).
+    \item Nel caso in cui si stia definendo un modello UML delle classi, dovrà permettere all'utente non solo di esportare il modello
+      in formato grafico (questa funzione dovrà essere disponibile per ogni modello o diagramma), ma anche di generare codice
+      sorgente a partire dal modello delle classi che si sta definendo. L'utente quindi dovrà avere la possibilità di scegliere il linguaggio nel quale vuole
+      che il codice sorgente sia scritto.
+    \item Planted dovrà fornire all'utente la possibilità di importare file sorgenti esistenti al suo interno.
+    \item Il modello UML delle classi potrà essere generato anche a partire da codice sorgente scritto in un linguaggio diverso da quello
+      utilizzato dalla libreria PlantUML (es: codice scritto in linguaggio Java).
+  \end{itemize}
   %--------------------------------------------------------------------------------------------------------------------------------------
   \section{Analisi}
-  //TODO da rivedere
-  Il sistema software dovrà essere in grado di gestire progetti, al cui interno ci potranno essere più file di natura diversa (es: file che descrive il modello,
-  file con codice sorgente, ecc...). Un \textbf{progetto (IProject)} è quindi un contenitore di file sorgenti che possono essere scritti in linguaggi diversi tra loro.
-  Ogni progetto al suo interno potrà contenere dei file di natura diversa tra loro. All'interno dell'editor ci sarà la possibilità di creare più progetti,
-  che a loro volta faranno parte dello stesso spazio di lavoro \textbf{(IWorkspace).}\\
-  Un \textbf{file sorgente (ISourceFile)} presente all'interno di un progetto rappresenta perciò un file di testo con una certa estensione a seconda del linguaggio che contiene.\\
+  Planted dovrà avere uno spazio di lavoro, detto \textbf{workspace (IWorkspace)}, all'interno del quale sarà possibilie gestire un insieme di entità sorgenti \textbf{ISourceEntity}.\\
+  Un progetto sarà un'entità sorgente e potrà contenere al suo interno più file sorgenti (anch'essi entità sorgenti), anche di natura diversa, purchè siano file che contengono un linguaggio
+  con una grammatica definita.\\
+  Un \textbf{progetto (IProject)} è quindi un contenitore di file sorgenti che possono essere scritti in linguaggi diversi tra loro.\\
+  Un \textbf{file sorgente (ISourceFile)} presente all'interno di un progetto rappresenta perciò un semplice file di testo, caratterizzato dall estensione,
+  che dipende e definisce il linguaggio che contiene.
   Queste 3 entità appena descritte sono rappresentate nel modello UML sottostante:
-  \begin{center}
-    \includegraphics[scale=0.5]{img/IWorkspace}
-    \includegraphics[scale=0.5]{img/IProject}
-    \includegraphics[scale=0.5]{img/ISourceFile}
-  \end{center}
-  Ogni file sorgente sarà caratterizzato dal \textbf{tipo (FileType),} che rappresenterà la natura del suo contenuto e la sua estensione.
-  \begin{center}
-    \includegraphics[scale=0.5]{img/filetype}
-  \end{center}
-  Il sistema inoltre richiede la capacità di interpretare il contenuto testuale di un file per poter generare codice sorgente nel linguaggio scelto.
-  Per soddisfare tale requisito sarà necessaria un'entità denominata \textbf{parser (IParser)}, che
-  \begin{center}
-    \includegraphics[scale=0.5]{img/IParserEmpty}
-  \end{center}
-
-
-
-
+  \begin{figure}[H]
+    \centering
+    \begin{framed}
+      \textbf{Schema UML dell'analisi del problema}\par\medskip
+      \includegraphics[scale=0.5]{img/domainmodel}
+    \end{framed}
+  \end{figure}
   %--------------------------------------------------------------------------------------------------------------------------------------
   \section{Design}
   %--------------------------------------------------------------------------------------------------------------------------------------
@@ -76,35 +72,18 @@
     \item \textbf{Controller} contiene la business logic del sistema. Si occupa dell'interazione tra model e view, in particolare riceve i comandi che l'utente da al sistema
     attraverso la view e li attua, aggiornando in seguito sia model che view.
   \end{itemize}
-  \begin{framed}
-    \centering
-    \begin{center}
-      \includegraphics[scale=0.5]{img/mvc}
-    \end{center}
-  \end{framed}
   %--------------------------------------------------------------------------------------------------------------------------------------
   \subsubsection{Model}
-  Il livello di Model fornisce accesso ai dati del sistema alla business logic, che è rappresentata dal livello denominato Controller.\\
-  I dati presenti all'interno del sistema sono definiti dal seguente modello dei dati:
-  \begin{framed}
-    \centering
-    \textbf{Data Model}
-    \begin{center}
-      \includegraphics[scale=0.5]{img/datamodel}
-    \end{center}
-  \end{framed}
-  Come si può notare dal modello dei dati viene utilizzato il \textit{pattern bridge} per separare l'entità ISourceEntity dalla sua concreta
-  implementazione (ISourceEntutyImpl). Questo permette di avere una maggiore libertà nel caso in cui si volessero aggiungere funzionalità
-  al sistema in futuro.\\
-  \\L'entità \textbf{IModel} rappresenta il punto di accesso al livello di Model per la business logic. Essa rappresenta quindi il vero e
-  proprio livello di Model del sistema. Le funzionalità che essa fornisce sono descritte di seguito:
+  Il livello di Model fornisce alla business logic, che è rappresentata dal livello denominato Controller, l'accesso ai dati del sistema.\\
+  L'entità \textbf{IModel} rappresenta il punto di accesso al livello di Model. Essa rappresenta quindi il vero e
+  proprio livello di Model del sistema. Le funzionalità che essa fornisce sono descritte dal diagramma UML seguente:
   \begin{center}
     \includegraphics[scale=0.5]{img/IModel}
   \end{center}
   %--------------------------------------------------------------------------------------------------------------------------------------
   \subsubsection{View}
-  Il livello di View è ciò che l'utente vede e con il quale può interagire per inviare comandi al resto del sistema.\\
-  L'entità \textbf{IView} rappresenta questo livello, e fornisce le funzionalità sotto descritte per interagire con esso:
+  Il livello di View è ciò che l'utente vede e con il quale interagiragisce, inviando comandi al Controller.\\
+  L'entità \textbf{IView} rappresenta questo livello, e fornisce le funzionalità sotto descritte:
   \begin{center}
     \includegraphics[scale=0.5]{img/IView}
   \end{center}
@@ -112,15 +91,23 @@
   \subsubsection{Controller}
   Il livello Controller è il vero e proprio core del sistema. Esso rappresenta la business logic del sistema, ciò che collega tra loro i due livelli
   sopra citati: Model e View.\\
-  L'entità che rappresenta tale livello è chiamata IController:
+  L'entità che rappresenta tale livello è chiamata \textbf{IController}:
   \begin{center}
     \includegraphics[scale=0.5]{img/IController}
   \end{center}
   Tutta la logica dell'applicazione sarà incapsulata nel componente che implementerà l'interfaccia di IController. In questo modo la logica del sistema
-  rimane indipendente dal modello dei dati (Model) e dalla loro rappresentazione dei dati (View).
+  rimane indipendente dal modello dei dati (Model) e dalla loro rappresentazione (View).
+  \begin{figure}[H]
+    \centering
+    \begin{framed}
+      \textbf{Schema UML Architetturale}\par\medskip
+      \includegraphics[scale=0.8]{img/mvc}
+    \end{framed}
+  \end{figure}
   %---------------------------------------------------------------------------------------------------------------------------------------------------------------
-  \subsubsection{Interazione dei livelli logici}
-  In questa sezione saranno descritte le funzionalità del sistema attraverso alcuni diagrammi di interazione, in particolare il modo con cui i tre livelli descritti
+  {\large \textbf{Interazione dei livelli logici}}
+  % \subsubsection{Interazione dei livelli logici}
+  \\[0.3in]Vengono ora descritte le funzionalità del sistema attraverso alcuni diagrammi di interazione, in particolare il modo con cui i tre livelli descritti
   in precedenza interagiscono tra loro.\\
   La modalità di interazione tra i tre livelli è la seguente:
   \begin{center}
@@ -128,95 +115,127 @@
   \end{center}
   La comunicazione tra il livello View ed il livello Controller avviene attraverso il \textit{pattern observer.} In particolare il Controller agisce
   da osservatore e la View da sorgente di eventi.\\
-  \\Come si può notare dal diagramma sottostante le due entità Controller e View implementano rispettivamente l'interfaccia ICommandObserver ed ICommandObservable
-  che a loro volta implementano le interfacce IObservable ed IObserver.
+  \\Come si può notare dal diagramma sottostante le due entità Controller e View implementano rispettivamente l'interfaccia \textit{ICommandObserver} ed \textit{ICommandObservable}
+  che a loro volta implementano le interfacce \textit{IObservable} ed \textit{IObserver}.
   \begin{center}
     \includegraphics[scale=0.6]{img/pattern-observer}
   \end{center}
-  Le due interfacce ICommandObserver ed ICommandObservable rappresentano due entità in grado di inviare ed ascoltare comandi, ed interagiscono tra
-  loro tramite il pattern observer. L'interazione tra loro è alla base dell'interazione che c'è tra View e Controller.
-  \begin{center}
+  Le due interfacce \textit{ICommandObserver} ed \textit{ICommandObservable} rappresentano due entità in grado di inviare ed ascoltare comandi, ed interagiscono tra
+  loro tramite il \textit{pattern observer}. L'interazione tra loro è alla base dell'interazione che c'è tra View e Controller.
+  \begin{figure}[H]
+    \centering
     \includegraphics[scale=0.6]{img/execCommand}
-  \end{center}
-  %--------------------------------------------------------------------------------------------------------------------------------------------------------------
-  \subsubsection{Parser}
-  Il sistema software deve possedere inoltre una funzionalità che permette di generare automaticamente il codice sorgente Java a partire dal modello UML delle
-  classi e viceversa. Per soddisfare questa funzionalità c'è la necessità di avere all'interno del sistema un'entità in grado di prendere in input uno stream di dati
-  e fornire in output un diverso stream di dati ma strettamente correlato a quello fornitogli in ingresso. Questà entità deve quindi essere in grado fare
-  un'analisi lessicale e sintattica dello stream passatogli in input, e fornire in output uno stream conforme lessicalmente e sintatticamente a ciò che viene
-  richiesto (sia esso codice Java o codice per la libreria PlantUML).\\
-  Il comportamento descritto sopra viene detto \textit{parsing,} ovvero l'insieme dell'analisi lessicale ed analisi sintattica di uno stream di dati.\\
-  \\L'entità che ha il compito di effettuare il parsing è chiamata \textbf{IParser.}
-  \begin{center}
-    \includegraphics[scale=0.6]{img/IParser}
-  \end{center}
+    \textbf{Esempio} - Interazione tra i livelli mediante pattern observer per l'esecuzione di comandi
+  \end{figure}
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \subsection{Design Dettagliato}
-  Il sistema è suddiviso in package, ognuno dei quali conterrà una parte di sistema.\\
-  Ogni package avrà al suo interno tutto ciò che si occupa della parte del sistema per cui è stato pensato.
-  \\Il primo package descritto è chiamato \textbf{interfaces}. Al suo interno si trovano le interfacce delle entità che compongono il modello del dominio. Queste
-  interfacce sono scritte nel linguaggio che si sceglierà per lo sviluppo del sistema software e dipendono esclusivamente dal meta modello creato per il sistema (per esempio
-  attraverso i diagrammi UML). Al suo interno non ci deve essere nessuna implementazione e logica del sistema.\\
-  La logica del sistema è contenuta nel package definito \textbf{controller,} che conterrà esclusivamente la business logic.\\
-  Il del package \textbf{model} è stato pensato per contenere le implementazioni delle entità del modello del dominio che riguardano il livello logico di Model
-  dell'architettura MVC. È bene suddividere i compiti del sistema, ed anche i package in modo che salti subito all'occhio di quale livello un'entità fa parte.\\
-  Per contenere il livello di View è stato creato il package \textbf{gui.}
-  \begin{framed}
+  Di seguito saranno illustrate ulteriori entità che andranno ad ampliare il modello del dominio già definito in fase di analisi.\\
+  \\Come già detto ogni file sorgente sarà caratterizzato da un'estensione che indentifica la natura del suo contenuto. Questa estensione
+  è descritta dal \textbf{FileType}.
+  \begin{figure}[H]
     \centering
-    \begin{center}
+    \includegraphics[scale=0.7]{img/filetype}
+  \end{figure}
+  Il sistema inoltre avrà la capacità di interpretare il contenuto testuale di un file per poter generare codice sorgente nel linguaggio scelto.
+  Per soddisfare tale requisito è necessario definire un'entità denominata \textbf{parser (IParser)}.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.7]{img/IParserEmpty}
+  \end{figure}
+  L'interazione tra il livello di View e Controller, come già detto, è basata sul \textit{pattern observer}. Tale interazione avverrà attraverso
+  lo scambio di comandi, che sono definiti all'interno dell'entità \textbf{Command}.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.7]{img/command}
+  \end{figure}
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \subsubsection{Suddivisione dei package}
+  Il sistema è suddiviso in package, ognuno dei quali conterrà una parte di sistema.\\
+  Ogni package avrà al suo interno tutto ciò che si occupa della parte del sistema per cui è stato pensato.\\
+  Il primo package descritto è chiamato \textbf{interfaces}. Al suo interno si troveranno le interfacce delle entità che compongono il modello del dominio. Queste
+  interfacce saranno scritte nel linguaggio che si sceglierà per lo sviluppo del sistema software e dipendono esclusivamente dal meta modello creato per il sistema.
+  Al suo interno non ci deve essere nessuna implementazione e logica del sistema.\\
+  La logica del sistema è contenuta nel package definito \textbf{controller,} che conterrà esclusivamente la business logic.\\
+  Il package \textbf{model} è stato pensato per contenere le implementazioni delle entità del modello del dominio che riguardano il livello logico di Model
+  dell'architettura MVC. È bene suddividere i package del sistema in modo che salti subito all'occhio di quale livello un'entità fa parte ma sopratutto per avere una suddivisione
+  più marcata tra le entità.\\
+  Per contenere il livello di View è stato creato il package \textbf{gui.}
+  \begin{figure}[H]
+    \centering
+    \begin{framed}
       \textbf{MVC - Packages}\par\medskip
       \includegraphics[scale=0.6]{img/MVCPackage}
-    \end{center}
-  \end{framed}
+    \end{framed}
+  \end{figure}
   Inoltre sono stati definiti ulteriori package per avere una maggiore suddivisione logica della componenti del sistema. Per questo motivo sono stati creati i package
-  \textbf{parser}, \textbf{parser.listener} e \textbf{parser.printer} che, come si può intuire dal nome, conterranno tutto ciò che riguarda la funzionalità di parsing.
-  Infine sono stati definiti altri package utili alla realizazzione finale del sistema: il package \textbf{utils} che conterrà al suo interno le utilità del sistema
-  e le impostazioni; il package \textbf{exception}, al cui interno si troveranno le del sistema; ed il package \textbf{filefilter} che sarà utile per la gestione dei file
+  \textbf{parser}, \textbf{parser.listener} e \textbf{parser.printer} che, come si può intuire dal nome, conterranno tutto ciò che riguarda la funzionalità di parsing, che verrà descritta in seguito.
+  Infine sono stati definiti altri package utili per la futura realizazzione del sistema: il package \textbf{utils} che conterrà al suo interno le utilità del sistema
+  e le impostazioni; il package \textbf{exception}, al cui interno si troveranno le eccezioni del sistema; ed il package \textbf{filefilter} che sarà utile per la gestione dei file
   di progetto.
-  \begin{framed}
+  \begin{figure}[H]
     \centering
-    \begin{center}
-      % \textbf{MVC - Packages}\par\medskip
+    \begin{framed}
       \includegraphics[scale=0.6]{img/generalPackages}
-    \end{center}
-  \end{framed}
+    \end{framed}
+  \end{figure}
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \section{Sviluppo}
-  La fase di sviluppo del sistema software richiede innanzitutto di scegliere il linguaggio di programmazione con il quale verrà scritto il codice. In questo caso, essendo questo progetto
-  sviluppato per l'esame di OOP, sarà usato (Java - versione 8).\\
-  Questa fase deve iniziare tassativamente solo dopo che si sono ultimate le fasi di analisi (dei requisiti e del problema) e si è definito il design del sistema, definendo quindi
-  il modello del dominio.\\
-  \\L'utilizzo di Java mi ha portato a basare lo sviluppo su un gestore di progetti Java e build automation. In questo modo l'implementazione del progetto non dipenderà da nessun IDE,
-  ma solo ed esclusivamente dai file di configurazione di esso.\\
-  Quando si è in questa fase si inizia sempre col creare le implementazioni delle entità che definiscono il modello del dominio ed i loro relativi Unit Test. Seguendo questa politica, ho successivamente
+  La fase di sviluppo del sistema software richiede innanzitutto la scelta del linguaggio di programmazione con il quale verrà scritto il sistema software.
+  Essendo tale progetto sviluppato per il corso di OOP15-16, la scelta ricade senza alcun dubbio sull'utilizzo di Java (versione 8).
+  Questa fase deve iniziare tassativamente solo dopo che si sono ultimate le fasi di analisi (dei requisiti e del problema) ed è stato definito il design dettagliato
+  del sistema.\\
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \subsection{Testing automatizzato}
+  La fase di testing è necessaria in qualunque sistema software. Tale fase consente di delineare le funzionalità, in modo che non ci siano modifiche di base in aggiornamenti
+  futuri che comprometterebbero tutto il sistema.\\
+  \\Sono stati effettuati test case automatizzati su alcune entità del modello, in particolare:
+  \begin{itemize}
+    \item \textbf{ModelTest} testing delle funzionalità dell'entità IModel
+    \item \textbf{ProjectTest} testing delle funzionalità dell'entità IProject
+    \item \textbf{WorkspaceTest} testing delle funzionalità dell'entità IWorkspace
+    \item \textbf{PlantSourceFileTest} testing delle funzionalità dell'entità IPlantSourceFile
+    \item \textbf{JavaSourceFileTest} testing delle funzionalità dell'entità IJavaSourceFile
+  \end{itemize}
+  Con gli ultimi due test case descritti, si sono testate anche le funzionalità dell'entità \textbf{ISourceFile}.
+  %-------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \subsection{Metodologia di lavoro}
+  L'utilizzo di Java mi ha portato a basare lo sviluppo su un gestore di progetti Java e build automation. In questo modo l'implementazione del progetto non dipenderà da nessun IDE,
+  ma solo ed esclusivamente dai file di configurazione di tale gestore di progetti.\\
+  In questa fase ho iniziato col creare le implementazioni delle entità che definiscono il modello del dominio. Seguendo questa politica, ho successivamente
   implementato tutte le componenti essenziali per l'architettura MVC in modo da avere un core dell'applicazione pronto per essere ampliato con le relative funzionalità.\\
   Implementare le componenti essenziali per l'architettura MVC consiste nello scrivere una prima, anche se scarna, business logic del sistema, che sarà in seguito ampliata per soddisfare tutte le funzionalità
-  che il sistema deve avere. Per fare ciò bisogna definire un comportamento per ogni metodo che si era definito nel modello del Controller.\\
-  \\Molto importante nello sviluppo è la creazione di classi di supporto e per le configurazioni del sistema. In questo modo risulta più semplice
-  la manutenzione e c'è una maggior divisione logica dei compiti. In particolare ho creato una classe, chiamata \textbf{SysKB}, che ha come unico scopo il raccoglimento
-  di tutti quei parametri usati nel sistema come predefiniti ma che possono essere oggetto di future modifiche non preventivate in questo progetto (es. path
-  delle cartelle dove si serializzano i dati). Oltre alla buona organizzazione ed alla facile manutenzione, questo permette anche di estendere alcune funzionalità
-  del sistema e modificarle senza dover modificare tutto il core di esso.
+  che il sistema dovrà avere. Per fare ciò bisogna definire un comportamento per ogni metodo che si era definito nel modello del Controller.\\
+  \\Molto importante nella fase di sviluppo è la creazione di classi di supporto e per le configurazioni del sistema. In questo modo risulta più semplice
+  la manutenzione del sistema finale e c'è una maggiore divisione logica dei compiti. In particolare ho creato una classe, chiamata \textbf{SysKB}, che ha come unico scopo il raccoglimento
+  di tutti quei parametri usati nel sistema come predefiniti ma che possono essere oggetto di future modifiche non preventivate in questo progetto (es: path
+  delle cartelle dove si serializzeranno i dati). Oltre alla buona organizzazione ed ad una semplificazione di manutenzione, questo permette anche di estendere alcune funzionalità
+  del sistema e modificarle senza grossi cambiamenti.
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
-  \subsection{Parsing}
-  La funzionalità di Parsing richiesta per lo soddisfacimento del requisito del sistema può essere sviluppata in più modi.\\Il primo modo, nonchè il più
-  semplice da costruire senza avere nessuna conoscenza avanzata sulla costruzione di un parser, è quello di costruire alcune classi che fungono da riconoscitori di
-  grammatica e "convertitori" di ciò che stanno leggendo verso un nuovo stream di dati il cui contenuto dovrà essere conforme al linguaggio richiesto. In questo
-  modo ho costruito due classi in grado di prendere in ingresso uno stream di dati (ed il tipo del file, che indica il modo in cui va interpretato lo stream),
-  analizzarne il contenuto e creare uno stream di dati in uscita che conterrà lo stream di dati preso in ingresso e convertito verso un linguaggio scelto.
+  \subsubsection{Parsing}
+  Una funzionalità del sistema consiste nel generare automaticamente codice sorgente scritto in un linguaggio scelto a partire dal modello UML delle
+  classi e viceversa. Per soddisfare questa funzionalità c'è la necessità di sviluppare all'interno del sistema un'entità in grado di prendere in input uno stream di dati
+  e fornire in output un diverso stream di dati ma strettamente correlato a quello fornitogli in ingresso. Questà entità deve quindi essere in grado fare
+  un'analisi lessicale e sintattica dello stream passatogli in input, e fornire in output uno stream conforme lessicalmente e sintatticamente a ciò che viene
+  richiesto (sia esso codice Java, codice per la libreria PlantUML, o altro codice con una grammatica definita).\\
+  Il comportamento descritto sopra viene detto \textit{parsing,} ovvero l'insieme dell'analisi lessicale ed analisi sintattica di uno stream di dati.\\
+  Tale funzionalità può essere sviluppata in più modi.\\Il primo modo, nonchè il più
+  semplice da costruire senza avere nessuna conoscenza avanzata sulla costruzione di un parser, è quello di sviluppare alcune classi che fungono da riconoscitori di
+  grammatica e "convertitori" dello stream di dati passatogli in ingresso verso un nuovo stream di dati il cui contenuto dovrà essere conforme al linguaggio richiesto. In questo
+  modo ho costruito due classi in grado di prendere in ingresso uno stream di dati (ed il tipo del file, che indica la natura dello stream),
+  analizzarne il contenuto e creare uno stream di dati in uscita che conterrà lo stream di dati preso in ingresso ma convertito verso il linguaggio scelto.
   \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{img/firstParser}
   \end{figure}
-  In questo modo se si vogliono aggiungere uno o più linguaggi a quelli che il sistema è già in grado di parserizzare, l'unica cosa da fare è creare un'entità
+  In questo modo se si vogliono aggiungere uno o più linguaggi a quelli che il sistema è già in grado di parserizzare, bisogna creare un'entità
   che estende l'interfaccia \textbf{IParser} ed al suo interno costruire un riconoscitore per la grammatica usata dal linguaggio che si vuole aggiungere.\\
-  \\La costruzione di un riconoscitore di  grammatica in questo modo però ha molti limiti, che si evidenziano all'aumentare dei possibili token che la grammatica
+  \\La costruzione di un riconoscitore di grammatica in questo modo però ha molti limiti, che si evidenziano all'aumentare dei possibili token che la grammatica
   utilizza. Per questo motivo (e non solo) ho deciso di sviluppare la funzionalità di Parsing attraverso l'utilizzo di un generatore di parser, e dopo essermi
   documentato su come si costruisce un "vero" parser ho optato per l'utilizzo di ANTLR v4.
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \subsubsection{ANTLR - Definizione delle Grammatiche}
   ANTLR è un generatore di parser per leggere, processare e/o tradurre testo strutturato. Il suo funzionamento si basa sulla definizione di una grammatica, ed a partire
-  da essa il tool genera le classi necessarie (lexer, parser, listener) per eseguire le varie operazioni.\\
+  da essa il tool genera le classi necessarie (lexer, parser, listener) per eseguire le varie operazioni sullo stream di input.\\
   \\Utilizzando questo tool ho scritto due grammatiche:
   \begin{itemize}
     \item \textbf{Plant} grammatica di base per il linguaggio usato dalla libreria PlantUML
@@ -248,7 +267,7 @@
         MODIFIER : '+' | '-' | '~' | '#';
         WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+ -> skip ;
       \end{lstlisting}
-    \item \textbf{SimpleJava} grammatica di base per Java
+    \item \textbf{SimpleJava} grammatica di base per il linguaggio Java
       \begin{lstlisting}
         grammar SimpleJava;
 
@@ -285,42 +304,45 @@
         WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+ -> skip ;
       \end{lstlisting}
   \end{itemize}
-  Le grammatiche di cui sopra, non comprendono tutto il linguaggio Java e tutto il linguaggio usato dalla libreria PlantUML, quindi non ho riscritto un parser per
-  questi due linguaggi, ma ho solamente scritto due grammatiche che comprendono i concetti base dei due linguaggi.\\
+  Le grammatiche di cui sopra, non comprendono tutta la grammatica del linguaggio Java e nemmeno tutta quella del linguaggio usato dalla libreria PlantUML, quindi non ho riscritto un parser per
+  questi due linguaggi, ma ho solamente scritto due grammatiche che comprendono i concetti base dei due linguaggi.
   \\A partire da queste grammatiche ho utilizzato il tool per generare il necessario per effettuare il parsing.\\
-  Come nella soluzione prima soluzione adottata per la costruzione del parser, ho costruito un entità in grado di convertire lo stream di dati preso in ingresso
+  Come nella prima soluzione adottata per la costruzione del parser, ho costruito un'entità in grado di convertire lo stream di dati preso in ingresso
   in uno stream di dati di natura diversa. L'utilizzo di ANTLR, non solo è ottimo per quanto riguarda la costruzione del parser, ma anche per quanto riguarda
-  la costruzione di quest'ultima entità che viene creata in maniera molto semplice utilizzando i listener creati da ANTLR.\\
-  I \textbf{listener} di ANTLR seguono il funzionamento definito dal pattern observer, e permettono di definire un comportamento specifico ogni qualvolta si
-  entra ed esce da una regola definita nella grammatica. In questo caso, implementando i listener delle relative grammatiche, è stato costruito uno stream di
+  la costruzione di quest'ultima entità che viene creata in maniera molto semplice utilizzando i listener generati automaticamente da ANTLR.\\
+  I \textbf{listener} di ANTLR seguono il funzionamento definito dal \textit{pattern observer}, e permettono di definire un comportamento specifico ogni qualvolta si
+  entra ed esce da una regola definita nella grammatica. In questo caso, implementando i listener delle relative grammatiche, ho costruito uno stream di
   dati che, non appena conclusasi l'analisi dello stream in input, conterrà l'output finale desiderato. Il listener relativo per una grammatica viene creato runtime
   da un'entità che implementa l'interfaccia \textit{IParser}, che seleziona quale listener creare in base al tipo dello stream di dati che gli viene passato
   come input.
-  \begin{center}
+  \begin{figure}[H]
+    \centering
     \begin{framed}
       \textbf{PlantPrinter}\par\medskip
       \includegraphics[scale=0.6]{img/PlantPrinter}
     \end{framed}
-  \end{center}
-  \begin{center}
+  \end{figure}
+  \begin{figure}[H]
+    \centering
     \begin{framed}
       \textbf{JavaPrinter}\par\medskip
       \includegraphics[scale=0.6]{img/JavaPrinter}
     \end{framed}
-  \end{center}
-  \begin{center}
+  \end{figure}
+  \begin{figure}[H]
+    \centering
     \begin{framed}
       Esempio di Listener - \textbf{PlantToJListener}\par\medskip
       \includegraphics[scale=0.6]{img/PlantToJ}
     \end{framed}
-  \end{center}
-  La creazione dello stream dati in output avviene mediante l'utilizzo del pattern observer tra Printer e Listener. Le due entità fungono rispettivamente da
+  \end{figure}
+  La creazione dello stream dati di output avviene mediante l'utilizzo del \textit{pattern observer} tra Printer e Listener. Le due entità fungono rispettivamente da
   \textit{observer} ed \textit{observable}. Lo stream di dati in output viene creato all'interno del Listener che, non appena ne ha completato la creazione,
   notifica l'ascoltatore (Printer).\\
   Un esempio del funzionamento di tale sistema è spiegato nel seguente diagramma di interazione:
   \begin{figure}[H]
+    \centering
     \begin{framed}
-      \centering
       \includegraphics[scale=0.6]{img/ListenerPrinter}
     \end{framed}
   \end{figure}
@@ -329,28 +351,29 @@
   La fase di sviluppo del sistema software è avvenuta attraverso l'utilizzo di vari tool e librerie.\\
   \\Il codice è stato scritto in Java 8, e salvato mediante l'utilizzo di \textit{git} su GitLab (\url{https://gitlab.com/}). Successivamente, come richiesto dal prof. Mirko Viroli,
   il codice è stato importato su BitBucket (\url{https://bitbucket.org/ashleycaselli/oop15-planted}) all'interno di un progetto appositamente creato
-  utilizzando \textit{mercurial} per il controllo di versione.
+  utilizzando \textit{mercurial} per il controllo di versione.\\
   Come descritto in precedenza ho usato un gestore di progetti, chiamato Maven (\url{http://maven.apache.org/}), integrato all'interno dell'IDE di sviluppo Eclipse
-  (\url{https://eclipse.org/}). Per la fase di testing ho utilizzato il tool JUnit 4 (\url{http://junit.org/junit4/}).\\
-  Ho utilizzato il generatore di parser ANTLR v4 (\url{http://www.antlr.org/}), come descritto in precedenza, per implementare la funzionalità di parsing.
-  Ed infine ho utilizzato la libreria PlantUML (\url{http://plantuml.com/}) per effettuare l'esportazione dei grafici / diagrammi in formato grafico.\\
-  NB: utilizzando Maven come gestore del progetto, esso non potrà essere importato direttamente in Eclipse come "progetto Eclipse".
+  (\url{https://eclipse.org/}).\\Per la fase di testing ho utilizzato il tool JUnit 4 (\url{http://junit.org/junit4/}).\\
+  Ho utilizzato il generatore di parser ANTLR v4 (\url{http://www.antlr.org/}) per implementare la funzionalità di parsing, ed infine ho utilizzato la libreria PlantUML (\url{http://plantuml.com/})
+  per effettuare l'esportazione dei grafici/diagrammi in formato grafico.\\
+  \\\textbf{NB:} utilizzando Maven come gestore del progetto, esso non potrà essere importato direttamente in Eclipse come "progetto Eclipse".
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \newpage
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-  \section{Conclusioni}
-  Non sono pienamente soddisfatto del risultato finale ottenuto anche se le funzionalità base del sistema sono state implementate tutte. Ciò che non mi rende
+  \section{Commenti finali}
+  Non sono pienamente soddisfatto del risultato finale ottenuto anche se sono state implementate tutte le funzionalità di base del sistema. Ciò che non mi rende
   completamente soddisfatto del lavoro svolto è la progettazione del sistema. In particolare avrei voluto che la definizione del modello del dominio fosse
-  ancora più estendibile ed in grado di essere estesa in un futuro senza grosse modifiche del progetto attuale.\\
+  ancora più estendibile per modifiche future.\\
+  Nonostante ciò, vedo ampi margini di estensione nel progetto. Le grammatiche dei linguaggi attuali possono essere ampliate, e possono essere supportati ulteriori
+  linguaggi (es: PHP, C\#). Grazie al disaccoppiamento Model-View-Controller, sarebbe opportuno modificare in blocco la View, costruendo un ambiente di modellazione e sviluppo
+  più simile ad un IDE.\\
   \\Sono invece molto soddisfatto di aver potuto ampliare le mie conoscenze di alcuni tool mai studiati nel corso della mia carriera universitaria, ma che ora
-  ritengo di fondamentale importanza per quanto riguarda lo sviluppo di un sistema software.\\
+  ritengo di fondamentale importanza per lo sviluppo di un sistema software.\\
   Inoltre, e non ultimo per importanza, ho avuto la possibilità di guardare avanti nella mia carriera universitaria ed anticipare alcuni argomenti che verranno
   studiati nel corso di laurea magistrale (utilizzo di ANTLR e costruzione di grammatiche/linguaggi).
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
   \clearpage
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
-
   \begin{appendices}
     \section{Guida Utente}
     La prima volta che si esegue l'applicazione Planted sarà visualizzata questa schermata, con il pannello dei progetti vuoto.
@@ -410,7 +433,7 @@
     dalla natura del file aperto nell'editor. In questo modo è possibile convertire file ".java" in file ".pu" e viceversa.\\
     \\Inoltre l'editor presenta un pannello (posto in basso) di visualizzazione real-time del modello grafico, che è utilizzato esclusivamente quando si
     sta scrivendo o si effettuano modifiche su un file ".pu". Tale pannello contiene l'anteprima grafica di ciò che verrà salvato con il comando di "Export Diagram"
-    in un file con formato grafico (es. ".png").\\
+    in un file con formato grafico (es: ".png").\\
     \\Le altre funzionalità di base come salva o elimina, non descritte in questa guida, permettono di effettuare il salvataggio del file che si sta editando
     e la rimozione dell'elemento selezionato. Se l'elemento selezionato è un progetto, la rimozione comporta anche la rimozione di tutti i file presenti
     all'interno di esso.
