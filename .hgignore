@@ -1,2 +1,7 @@
 syntax: glob
 *.class
+planted/.settings
+planted/planted-core/.settings
+planted/planted-core/.classpath
+planted/planted-core/.project
+.project
