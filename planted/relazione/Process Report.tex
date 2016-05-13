@@ -436,7 +436,35 @@
     in un file con formato grafico (es: ".png").\\
     \\Le altre funzionalità di base come salva o elimina, non descritte in questa guida, permettono di effettuare il salvataggio del file che si sta editando
     e la rimozione dell'elemento selezionato. Se l'elemento selezionato è un progetto, la rimozione comporta anche la rimozione di tutti i file presenti
-    all'interno di esso.
+    all'interno di esso.\\
+    {\large \textbf{\\Sintassi - Esempi di utilizzo\\}}
+    La sintassi del codice supportato dall'editor per la descrizione del modello delle classi attraverso il linguaggio PlantUML è la seguente:
+    \begin{itemize}
+      \item \textbf{classe}: "class" nome "{" contenuto "}"
+      \item \textbf{modificatore}: è sempre opzionale, può avere valore +, -, \# che indica rispettivamente \textit{public, private, protected}
+      \item definizione di un \textbf{campo}: [modificatore] nome : tipo
+      \item definizione di un \textbf{metodo}: [modificatore] [tipo] nome "("[parametri]")", il tipo è opzionale, se non esiste viene considerato \textit{void}
+      \item definizione dei \textbf{parametri}: tipo nome
+    \end{itemize}
+    \textbf{Esempio - Generazione classe Java a partire dal modello}
+    \begin{figure}[H]
+      \centering
+      \begin{framed}
+        \includegraphics[scale=0.5]{img/application/PersonaModel}
+        \includegraphics[scale=0.5]{img/application/PersonaDiagram}
+        \includegraphics[scale=0.5]{img/application/PersonaClass}
+      \end{framed}
+    \end{figure}
+    \clearpage
+    \textbf{Esempio - Generazione del modello a partire da classe Java}
+    \begin{figure}[H]
+      \centering
+      \begin{framed}
+        \includegraphics[scale=0.5]{img/application/ComplexClass}
+        \includegraphics[scale=0.5]{img/application/ComplexModel}
+        \includegraphics[scale=0.5]{img/application/ComplexDiagram}
+      \end{framed}
+    \end{figure}
   \end{appendices}
   %-------------------------------------------------------------------------------------------------------------------------------------------------------------
 \end{document}
