@@ -1,4 +1,4 @@
-package domainmodel;
+package model;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +13,13 @@ import interfaces.IWorkspace;
 import utils.DirUtils;
 import utils.SysKB;
 
+/**
+ * Questa classe rappresenta un workspace. Implementa l'interfaccia
+ * <code>IWorkspace</code> ed estende la classe <code>HashMap</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 @SuppressWarnings("serial")
 public class Workspace extends HashMap<Integer, IProject> implements IWorkspace {
 
@@ -28,7 +35,11 @@ public class Workspace extends HashMap<Integer, IProject> implements IWorkspace 
 
     @Override
     public void setName(String name) {
-	// TODO auto generated method
+	try {
+	    throw new UnsupportedOperationException();
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
     }
 
     @Override

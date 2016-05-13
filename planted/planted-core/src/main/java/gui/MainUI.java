@@ -42,7 +42,6 @@ import javax.swing.tree.TreePath;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
-import domainmodel.Project;
 import exception.NotPermittedCommandException;
 import filefilter.JavaFileFilter;
 import filefilter.PlantFileFilter;
@@ -55,8 +54,16 @@ import interfaces.IProject;
 import interfaces.ISourceEntityImpl;
 import interfaces.ISourceFile;
 import interfaces.IView;
+import model.Project;
 import utils.SysKB;
 
+/**
+ * Questa classe rappresenta la View. Implementa l'interfaccia
+ * <code>IView</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class MainUI implements IView {
 
     private JFrame frame;
@@ -70,6 +77,7 @@ public class MainUI implements IView {
     private JButton buttonExport;
     private JLabel diagramLabel;
     private JButton buttonGenerateCode;
+    private JMenuItem mntmImportFile;
 
     private static final String MENU_ITEM_0 = "Planted";
     private static final String MENU_ITEM_0_0 = "Informazioni su " + MENU_ITEM_0;
@@ -154,8 +162,9 @@ public class MainUI implements IView {
 	});
 	menuBar.add(menuItem);
 
-	JMenuItem mntmImportFile = new JMenuItem(MENU_ITEM_3);
+	mntmImportFile = new JMenuItem(MENU_ITEM_3);
 	menuBar.add(mntmImportFile);
+	mntmImportFile.setVisible(false);
 	frame.setResizable(false);
 	frame.getContentPane().setLayout(null);
 	mntmImportFile.addActionListener(new ActionListener() {
@@ -288,6 +297,8 @@ public class MainUI implements IView {
 	    buttonRemove = new JButton(new ImageIcon(urlImageRemove));
 	    // toolbar.add(buttonOpen);
 	    toolbar.add(buttonSave);
+	    buttonSave.setEnabled(false);
+	    buttonRemove.setEnabled(false);
 	    // toolbar.add(buttonAbout);
 	    toolbar.add(buttonRemove);
 	    buttonExport = new JButton("Export Diagram");
@@ -442,13 +453,24 @@ public class MainUI implements IView {
     @Override
     public void setTitle(String proj) {
 	this.frame.setTitle(proj);
+	this.buttonSave.setEnabled(true);
+	this.buttonRemove.setEnabled(true);
+	this.mntmImportFile.setVisible(true);
     }
 
     @Override
-    public void clear() {
+    public void clearList() {
 	DefaultListModel<ISourceEntityImpl> listModel = (DefaultListModel<ISourceEntityImpl>) listSrcFile.getModel();
 	listModel.clear();
 	editorPane.setText(null);
+    }
+
+    @Override
+    public void clearTree() {
+	DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+	DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+	root.removeAllChildren();
+	model.reload();
     }
 
     @Override
@@ -473,14 +495,6 @@ public class MainUI implements IView {
 	} catch (NotPermittedCommandException e) {
 	    e.printStackTrace();
 	}
-    }
-
-    @Override
-    public void clearAll() {
-	DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-	DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-	root.removeAllChildren();
-	model.reload();
     }
 
     @Override

@@ -1,8 +1,15 @@
-package domainmodel;
+package model;
 
 import interfaces.FileType;
 import interfaces.IPlantSourceFile;
 
+/**
+ * Questa classe rappresenta un file sorgente PlantUML. Implementa l'interfaccia
+ * <code>IPlantSourceFile</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class PlantSourceFile implements IPlantSourceFile {
 
     /**

@@ -1,5 +1,11 @@
 package interfaces;
 
+/**
+ * Questo enumerativo contiene tutti i comandi che possono essere eseguiti.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public enum Command {
 
     /* workspace */

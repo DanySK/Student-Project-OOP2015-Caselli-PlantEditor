@@ -1,9 +1,16 @@
-package domainmodel;
+package model;
 
 import interfaces.FileType;
-import interfaces.IPlantSourceFile;
+import interfaces.IJavaSourceFile;
 
-public class JavaSourceFile implements IPlantSourceFile {
+/**
+ * Questa classe rappresenta un file sorgente Java. Implementa l'interfaccia
+ * <code>IJavaSourceFile</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
+public class JavaSourceFile implements IJavaSourceFile {
 
     /**
      * 

@@ -13,9 +13,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import domainmodel.JavaSourceFile;
-import domainmodel.PlantSourceFile;
-import domainmodel.Project;
 import exception.NotPermittedCommandException;
 import interfaces.Command;
 import interfaces.FileType;
@@ -26,11 +23,21 @@ import interfaces.IProject;
 import interfaces.ISourceEntityImpl;
 import interfaces.ISourceFile;
 import interfaces.IView;
+import model.JavaSourceFile;
+import model.PlantSourceFile;
+import model.Project;
 import net.sourceforge.plantuml.SourceStringReader;
 import parser.printer.JavaPrinter;
 import parser.printer.PlantPrinter;
 import utils.SysKB;
 
+/**
+ * Questa classe rappresenta un controller. Implementa l'interfaccia
+ * <code>IController</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class Controller implements IController {
 
     private IView view;
@@ -51,6 +58,9 @@ public class Controller implements IController {
 	this.view = view;
     }
 
+    /**
+     * Metodo per effettuare il caricamento dei dati attraverso il model.
+     */
     @SuppressWarnings("unchecked")
     private void load() {
 	FileInputStream fileIn;
@@ -66,6 +76,9 @@ public class Controller implements IController {
 	}
     }
 
+    /**
+     * Metodo per effettuare il salvataggio attraverso il model.
+     */
     private void save() {
 	FileOutputStream fileOut;
 	try {
@@ -77,15 +90,32 @@ public class Controller implements IController {
 	}
     }
 
+    /**
+     * Metodo per aggiungere un progetto al modello, con conseguente
+     * aggiornamento della view.
+     * 
+     * @param project
+     */
     private void addProject(IProject project) {
 	if (this.model.addData(project)) {
 	    this.view.addOutput(project);
 	    this.save();
 	    this.selectProject(project.getName());
-	    this.clear();
+	    this.clearAllView();
 	}
     }
 
+    /**
+     * Metodo per aggiungere un file sorgente, con conseguente aggiornamento
+     * della view.
+     * 
+     * @param filename
+     *            nome del file sorgente
+     * @param fileType
+     *            tipo del file sorgente
+     * @param content
+     *            contenuto del file sorgente
+     */
     private void addSourceFile(String filename, FileType fileType, String content) {
 	ISourceFile file = null;
 	switch (fileType) {
@@ -105,6 +135,13 @@ public class Controller implements IController {
 	}
     }
 
+    /**
+     * Metodo per selezionare il progetto attivo, con conseguente aggiornamento
+     * della view.
+     * 
+     * @param proj
+     *            progetto attivo
+     */
     private void selectProject(String proj) {
 	if (this.activeProject != null) {
 	    if (!this.activeProject.getName().equals(proj)) {
@@ -115,16 +152,23 @@ public class Controller implements IController {
 	    this.activeProject = new Project(proj);
 	    this.view.setTitle(this.activeProject.toString());
 	}
-	this.clear();
+	this.clearAllView();
 	int tmpHash = this.activeProject.hashCode();
 	@SuppressWarnings("unchecked")
 	IProject p = ((HashMap<Integer, IProject>) this.model).get(tmpHash);
 	p.getSrcFiles().forEach(f -> this.view.addOutput(f));
     }
 
+    /**
+     * Metodo per rimuovere un file sorgente dal modello con successivo
+     * aggiornarmento della view.
+     * 
+     * @param entity
+     *            file sorgente da rimuovere
+     */
     private void removeSourceFile(ISourceEntityImpl entity) {
 	this.model.removeData(entity, activeProject);
-	this.clear();
+	this.clearAllView();
 	int tmpHash = this.activeProject.hashCode();
 	@SuppressWarnings("unchecked")
 	IProject p = ((HashMap<Integer, IProject>) this.model).get(tmpHash);
@@ -132,6 +176,12 @@ public class Controller implements IController {
 	this.save();
     }
 
+    /**
+     * Metodo per aprire l'editor nella view.
+     * 
+     * @param entity
+     *            entità da inserire all'interno dell'editor
+     */
     private void openEditor(ISourceEntityImpl entity) {
 	this.view.openEditor(entity);
     }
@@ -157,8 +207,8 @@ public class Controller implements IController {
     private void removeProject() {
 	this.model.removeData(activeProject);
 	this.save();
-	this.clear();
-	this.view.clearAll();
+	this.clearAllView();
+	this.view.clearTree();
 	for (IProject p : ((HashMap<Integer, IProject>) this.model).values()) {
 	    this.view.addOutput(p);
 	}
@@ -196,6 +246,9 @@ public class Controller implements IController {
 	}
     }
 
+    /**
+     * Metodo per pulire i diagrammi nella view.
+     */
     private void clearDiagram() {
 	this.view.clearDiagram();
     }
@@ -211,6 +264,14 @@ public class Controller implements IController {
 	}
     }
 
+    /**
+     * Metodo per effettuare il salvataggio dell'editor.
+     * 
+     * @param entity
+     *            entità da salvare
+     * @param content
+     *            contenuto da salvare
+     */
     private void saveEditor(ISourceEntityImpl entity, String content) {
 	((ISourceFile) entity).setContent(content);
 	this.save();
@@ -230,6 +291,12 @@ public class Controller implements IController {
 	}
     }
 
+    /**
+     * Metodo per esportare il diagramma.
+     * 
+     * @param srcFile
+     *            file sorgente
+     */
     private void exportDiagram(ISourceFile srcFile) {
 	OutputStream png = null;
 	File f = new File(SysKB.EXPORT_PATH + activeProject.getName() + SysKB.DIR_SEPARATOR + SysKB.DIAGRAM_PATH);
@@ -243,9 +310,15 @@ public class Controller implements IController {
 	} catch (IOException e1) {
 	    e1.printStackTrace();
 	}
-	this.view.addOutput("Diagram exported");
+	this.view.addOutput("Diagram exported to: " + f.getPath());
     }
 
+    /**
+     * Metodo per generare il diagramma.
+     * 
+     * @param srcFile
+     *            file sorgente
+     */
     private void generateDiagram(ISourceFile srcFile) {
 	OutputStream png = null;
 	File f = new File("_tmp");
@@ -276,10 +349,20 @@ public class Controller implements IController {
 	}
     }
 
+    /**
+     * Metodo per esportazione del codice.
+     * 
+     * @param cmd
+     *            comando da eseguire
+     * @param srcFile
+     *            file sorgente
+     * @param fileType
+     *            tipo del file sorgente
+     * @throws NotPermittedCommandException
+     */
     private void exportCode(Command cmd, ISourceFile srcFile, FileType fileType) throws NotPermittedCommandException {
 	IParser parser;
 	PrintWriter out = null;
-	// String toWrite = StringUtils.EMPTY;
 	File dirProj = new File(SysKB.EXPORT_PATH + activeProject.getName());
 	File f = null;
 	dirProj.mkdirs();
@@ -322,11 +405,12 @@ public class Controller implements IController {
 		    out.write(list2.get(i + 1));
 		    out.close();
 		}
+		break;
 	    default:
 		throw new NotPermittedCommandException();
 	    }
 	}
-	this.view.addOutput("Code Exported");
+	this.view.addOutput("Code Exported to: " + f.getPath());
     }
 
     @Override
@@ -341,8 +425,11 @@ public class Controller implements IController {
 	}
     }
 
-    private void clear() {
-	this.view.clear();
+    /**
+     * Metodo per pulire tutta la view.
+     */
+    private void clearAllView() {
+	this.view.clearList();
 	this.view.clearDiagram();
     }
 

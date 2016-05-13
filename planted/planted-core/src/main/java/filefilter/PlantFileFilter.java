@@ -7,6 +7,14 @@ import javax.swing.filechooser.FileFilter;
 import interfaces.FileType;
 import interfaces.IFileFilter;
 
+/**
+ * Questa classe rappresenta un filtro per i file PlantUML. Estende la classe
+ * <code>FileFilter</code>, ed implementa l'interfaccia
+ * <code>IFileFilter</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class PlantFileFilter extends FileFilter implements IFileFilter {
 
     @Override

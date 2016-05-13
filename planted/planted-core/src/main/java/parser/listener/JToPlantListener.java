@@ -17,6 +17,15 @@ import interfaces.IObserver;
 import interfaces.IParseObservable;
 import interfaces.IParseObserver;
 
+/**
+ * Questa classe rappresenta un listener per la grammatica SimpleJava, per
+ * costruire codice utilizzato dalla libreria PlantUML a partire da codice Java.
+ * Estende la classe <code>SimpleJavaBaseListener</code> e implementa
+ * l'interfaccia <code>IParseObservable</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class JToPlantListener extends SimpleJavaBaseListener implements IParseObservable {
 
     private IParseObserver observer = null;
@@ -124,6 +133,14 @@ public class JToPlantListener extends SimpleJavaBaseListener implements IParseOb
 	ret = ret.concat(new StringBuilder().append("\n}").toString());
     }
 
+    /**
+     * Metodo per la conversione dei modificatori del linguaggio.
+     * 
+     * @param s
+     *            testo contenente il modificatore
+     * @return modificatore convertito (conforme al linguaggio usato dalla
+     *         libreria PlantUML)
+     */
     private String getModifiers(String s) {
 	switch (s) {
 	case PUBLIC:
@@ -133,9 +150,8 @@ public class JToPlantListener extends SimpleJavaBaseListener implements IParseOb
 	case PROTECTED:
 	    return "#";
 	default:
-	    break;
+	    return null;
 	}
-	return null;
     }
 
     @Override

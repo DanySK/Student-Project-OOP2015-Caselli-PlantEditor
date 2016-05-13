@@ -19,6 +19,13 @@ import interfaces.IParser;
 import parser.listener.JToJListener;
 import parser.listener.PlantToJListener;
 
+/**
+ * Questa classe rappresenta un parser per il linguaggio Java. Implementa le
+ * interfacce <code>IParser</code> e <code>IParseObserver</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class JavaPrinter implements IParser, IParseObserver {
 
     private List<String> ret = new ArrayList<>();
@@ -36,6 +43,14 @@ public class JavaPrinter implements IParser, IParseObserver {
 
     }
 
+    /**
+     * Metodo per parserizzare codice Java e tradurlo in codice per il
+     * linguaggio Java.
+     * 
+     * @param in
+     *            codice conforme al linguaggio Java
+     * @return codice conforme al linguaggio Java
+     */
     private List<String> printJavaFromJava(String in) {
 	// Get our lexer
 	SimpleJavaLexer lexer = new SimpleJavaLexer(new ANTLRInputStream(in));
@@ -56,6 +71,15 @@ public class JavaPrinter implements IParser, IParseObserver {
 	return ret;
     }
 
+    /**
+     * Metodo per parserizzare codice per la libreria PlantUML e tradurlo in
+     * codice per il linguaggio Java.
+     * 
+     * @param in
+     *            codice conforme al linguaggio utilizzato dalla libreria
+     *            PlantUML
+     * @return codice conforme al linguaggio Java
+     */
     private List<String> printJavaFromPlant(String in) {
 	// Get our lexer
 	PlantLexer lexer = new PlantLexer(new ANTLRInputStream(in));

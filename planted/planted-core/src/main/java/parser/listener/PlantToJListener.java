@@ -18,6 +18,15 @@ import interfaces.IObserver;
 import interfaces.IParseObservable;
 import interfaces.IParseObserver;
 
+/**
+ * Questa classe rappresenta un listener per la grammatica Plant, per costruire
+ * codice Java a partire dal linguaggio utilizzato dalla libreria PlantUML.
+ * Estende la classe <code>PlantBaseListener</code> e implementa l'interfaccia
+ * <code>IParseObservable</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class PlantToJListener extends PlantBaseListener implements IParseObservable {
 
     private IParseObserver observer = null;
@@ -135,10 +144,6 @@ public class PlantToJListener extends PlantBaseListener implements IParseObserva
 	returnTypeMethod = false;
     }
 
-    // public String getValue() {
-    // return ret;
-    // }
-
     @Override
     public void enterReturnTypeMethodDeclaration(ReturnTypeMethodDeclarationContext ctx) {
 	super.enterReturnTypeMethodDeclaration(ctx);
@@ -146,6 +151,13 @@ public class PlantToJListener extends PlantBaseListener implements IParseObserva
 	ret = ret.concat(new StringBuilder().append(ctx.getText() + " ").toString());
     }
 
+    /**
+     * Metodo per la conversione dei modificatori del linguaggio.
+     * 
+     * @param s
+     *            testo contenente il modificatore
+     * @return modificatore convertito (conforme al linguaggio Java)
+     */
     private String getModifiers(String s) {
 	switch (s) {
 	case PLUS:
@@ -155,9 +167,8 @@ public class PlantToJListener extends PlantBaseListener implements IParseObserva
 	case HASH:
 	    return "protected";
 	default:
-	    break;
+	    return null;
 	}
-	return null;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package domainmodel;
+package model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,13 @@ import java.util.List;
 import interfaces.IProject;
 import interfaces.ISourceEntityImpl;
 
+/**
+ * Questa classe rappresenta un progetto. Implementa l'interfaccia
+ * <code>IProject</code>.
+ * 
+ * @author ashleycaselli
+ *
+ */
 @SuppressWarnings("serial")
 public class Project implements IProject {
 

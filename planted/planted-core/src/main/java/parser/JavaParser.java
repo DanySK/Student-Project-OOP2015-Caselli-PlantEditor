@@ -10,12 +10,28 @@ import interfaces.FileType;
 import interfaces.IParser;
 import utils.StringUtils;
 
+/**
+ * Questa classe rappresenta un parser per il linguaggio Java costruito come
+ * riconoscitore di grammatica.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class JavaParser implements IParser {
 
     private final String PLUS = "+";
     private final String MINUS = "-";
     private final String HASH = "#";
 
+    /**
+     * Metodo per parserizzare codice per la libreria PlantUML e tradurlo in
+     * codice per il linguaggio Java.
+     * 
+     * @param code
+     *            codice conforme al linguaggio utilizzato dalla libreria
+     *            PlantUML
+     * @return codice conforme al linguaggio Java
+     */
     private String parseJavaFromPlant(String code) {
 	String ret = null;
 	String src = code.trim();
@@ -40,7 +56,6 @@ public class JavaParser implements IParser {
 		.append(newSt.get(2).substring(1)).append(" {\n").toString();
 	for (int i = 4; i < newSt.size() - 2; i++) {
 	    List<String> ls = Arrays.asList(newSt.get(i).split(":"));
-	    // ls.forEach(l -> l.trim());
 	    ret = ret.concat(new StringBuilder().append("\n").append("\t")
 		    .append(getModifiers(Character.toString(newSt.get(i).charAt(0)))).append(" ").append(ls.get(1))
 		    .toString());
@@ -63,6 +78,13 @@ public class JavaParser implements IParser {
 	return ret;
     }
 
+    /**
+     * Metodo per la conversione dei modificatori del linguaggio.
+     * 
+     * @param s
+     *            testo contenente il modificatore
+     * @return modificatore convertito (conforme al linguaggio Java)
+     */
     private String getModifiers(String s) {
 	switch (s) {
 	case PLUS:
@@ -72,9 +94,8 @@ public class JavaParser implements IParser {
 	case HASH:
 	    return "protected";
 	default:
-	    break;
+	    return null;
 	}
-	return null;
     }
 
     @Override
@@ -82,8 +103,9 @@ public class JavaParser implements IParser {
 	switch (srcType) {
 	case PLANTUML:
 	    return Lists.newArrayList(parseJavaFromPlant(code));
+	default:
+	    return null;
 	}
-	return null;
     }
 
 }

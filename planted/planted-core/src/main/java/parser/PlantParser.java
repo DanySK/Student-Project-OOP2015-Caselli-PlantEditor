@@ -10,12 +10,27 @@ import interfaces.FileType;
 import interfaces.IParser;
 import utils.StringUtils;
 
+/**
+ * Questa classe rappresenta un parser per il linguaggio utilizzato dalla
+ * libreria PlantUML costruito come riconoscitore di grammatica.
+ * 
+ * @author ashleycaselli
+ *
+ */
 public class PlantParser implements IParser {
 
     private final String PUBLIC = "public";
     private final String PRIVATE = "private";
     private final String PROTECTED = "protected";
 
+    /**
+     * Metodo per parserizzare codice Java e tradurlo in codice per il
+     * linguaggio utilizzato dalla libreria PlantUML.
+     * 
+     * @param code
+     *            codice conforme al linguaggio Java
+     * @return codice conforme al linguaggio utilizzato dalla libreria PlantUML
+     */
     private String parsePlantFromJava(String code) {
 	String ret = new StringBuilder().append("@startuml").append("\n").toString();
 	String src = code.trim();
@@ -61,10 +76,19 @@ public class PlantParser implements IParser {
 	switch (srcType) {
 	case JAVA:
 	    return Lists.newArrayList(parsePlantFromJava(code));
+	default:
+	    return null;
 	}
-	return null;
     }
 
+    /**
+     * Metodo per la conversione dei modificatori del linguaggio.
+     * 
+     * @param s
+     *            testo contenente il modificatore
+     * @return modificatore convertito (conforme al linguaggio usato dalla
+     *         libreria PlantUML)
+     */
     private String getModifiers(String s) {
 	switch (s) {
 	case PUBLIC:
@@ -74,9 +98,8 @@ public class PlantParser implements IParser {
 	case PROTECTED:
 	    return "#";
 	default:
-	    break;
+	    return null;
 	}
-	return null;
     }
 
 }
