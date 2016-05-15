@@ -23,7 +23,16 @@ import utils.SysKB;
 @SuppressWarnings("serial")
 public class Workspace extends HashMap<Integer, IProject> implements IWorkspace {
 
-    public Workspace() {
+    private static IWorkspace instance = null;
+
+    public static synchronized IWorkspace getInstance() {
+	if (instance == null) {
+	    instance = new Workspace();
+	}
+	return instance;
+    }
+
+    private Workspace() {
 	super();
 	DirUtils.createWorkspace();
     }

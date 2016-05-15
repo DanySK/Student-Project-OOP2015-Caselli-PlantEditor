@@ -8,6 +8,7 @@ import java.io.InputStream;
 import controller.Controller;
 import exception.NotPermittedCommandException;
 import interfaces.Command;
+import interfaces.IController;
 import interfaces.IView;
 import interfaces.IWorkspace;
 import model.Workspace;
@@ -23,8 +24,8 @@ public class Application {
 
     public static void main(String[] args) {
 	IView view = new MainUI();
-	Controller controller = new Controller();
-	IWorkspace model = new Workspace();
+	IController controller = Controller.getInstance();
+	IWorkspace model = Workspace.getInstance();
 	controller.setModel(model);
 	controller.setView(view);
 	view.registerObserver(controller);

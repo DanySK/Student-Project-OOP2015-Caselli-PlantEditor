@@ -43,9 +43,17 @@ public class Controller implements IController {
     private IView view;
     private IModel model;
     private IProject activeProject;
+    private static IController instance = null;
 
-    public Controller() {
-	// TODO Auto-generated constructor stub
+    private Controller() {
+	super();
+    }
+
+    public static synchronized IController getInstance() {
+	if (instance == null) {
+	    instance = new Controller();
+	}
+	return instance;
     }
 
     @Override
